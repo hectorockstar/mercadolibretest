@@ -7,8 +7,6 @@ import lombok.EqualsAndHashCode;
 import java.util.HashMap;
 import java.util.Map;
 @Data
-@EqualsAndHashCode(callSuper = false)
-@AllArgsConstructor
 public class URLException extends Exception{
 
     private static final Map<String, String> EXCEPTION_MESSAGES;

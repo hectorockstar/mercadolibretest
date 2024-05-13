@@ -18,13 +18,13 @@ public class UrlManagementController {
         this.urlManegementService = urlManegementService;
     }
 
-    @GetMapping("/get-short-url")
+    @PostMapping("/create-short-url")
     @ResponseBody
-    public ResponseEntity<Object> getShortUrl(@RequestParam("url") String url) {
-
-        UrlEntity urlEntity = urlManegementService.getShortUrl(url);
-        return ResponseEntity.ok(Utils.toJSONFromObject(urlEntity));
+    public ResponseEntity<Object> createShortUrl(@RequestParam("url") String url) {
+        return ResponseEntity.ok(Utils.toJSONFromObject(urlManegementService.createShortUrl(url)));
     }
+
+
 
     @GetMapping("/get-long-url")
     @ResponseBody
