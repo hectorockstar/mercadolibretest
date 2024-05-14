@@ -1,11 +1,17 @@
 package com.mercadolibretest.service;
 
+import com.mercadolibretest.constants.MercadoLibreTestConstants;
+import com.mercadolibretest.exceptionhandler.custom.UrlConfigActionException;
 import com.mercadolibretest.model.UrlEntity;
 import com.mercadolibretest.repository.UrlManagementRepository;
 import com.mercadolibretest.utils.Utils;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
@@ -26,27 +32,48 @@ public class UrlManegementService {
 
     @SneakyThrows
     public UrlEntity createShortUrl(String url) {
-
         Utils.urlValidator(url);
-
-        String shorUrl = encodeUrl(url);
-
-        UrlEntity urlEntity = UrlEntity.getUrlEntityBuilder(new BigInteger("1"), url, shorUrl, new Date());
-
+        String shortUrl = encodeUrl(url);
+        UrlEntity urlEntity = UrlEntity.getUrlEntityBuilder(new BigInteger("1"), url, shortUrl, new Date());
         urlManagementRepository.save(urlEntity);
-        System.out.println(shorUrl);
 
         return urlEntity;
     }
 
-    public String encodeUrl(String url) throws NoSuchAlgorithmException {
-        MessageDigest sha256Hash = MessageDigest.getInstance("SHA-256");
-        byte[] sha256EncodedHash = sha256Hash.digest(url.getBytes(StandardCharsets.UTF_8));
-        String encoded = Base64.getEncoder().encodeToString(sha256EncodedHash);
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(encoded.replace("/", ""));
+    public UrlEntity getLongUrlByShortUrl(String shortUrl) {
+        return urlManagementRepository.findByShortUrl(shortUrl);
+    }
 
-        return stringBuilder.substring(0, 7).toUpperCase();
+    public void redirectToLonglUrlbyShortUrl(String shortUrl, HttpServletResponse httpServletResponse) {
+
+        UrlEntity urlEntity = urlManagementRepository.findByShortUrl(shortUrl);
+
+        httpServletResponse.setStatus(HttpStatus.MOVED_TEMPORARILY.value());
+        httpServletResponse.setHeader(HttpHeaders.LOCATION, urlEntity.getLongUrl());
+        httpServletResponse.setHeader(HttpHeaders.CONNECTION, "close");
+    }
+
+    @Transactional
+    @SneakyThrows
+    public UrlEntity deleteUrlConfigByShortUrl(String shortUrl) {
+        UrlEntity urlEntity = urlManagementRepository.findByShortUrl(shortUrl);
+
+        if(urlEntity == null) {
+            throw UrlConfigActionException.create("DELETE");
+        }
+        urlManagementRepository.deleteByShortUrl(urlEntity.getShortUrl());
+        return urlEntity;
+    }
+
+    private String encodeUrl(String url) throws NoSuchAlgorithmException {
+        byte[] sha256EncodedHash = MessageDigest.getInstance(MercadoLibreTestConstants.SHA256)
+                                        .digest(url.getBytes(StandardCharsets.UTF_8));
+        String base64Encoded = Base64.getEncoder().encodeToString(sha256EncodedHash);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(base64Encoded.replace("/", ""));
+
+        return sb.substring(0, 7).toUpperCase();
     }
 
 

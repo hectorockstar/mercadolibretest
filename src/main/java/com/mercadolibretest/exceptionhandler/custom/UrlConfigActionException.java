@@ -1,25 +1,23 @@
 package com.mercadolibretest.exceptionhandler.custom;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.util.HashMap;
 import java.util.Map;
-@Data
-public class URLException extends Exception{
 
+@Data
+public class UrlConfigActionException extends Exception {
     private static final Map<String, String> EXCEPTION_MESSAGES;
 
     private final String message;
 
-    public static URLException create(String exceptionType) {
-        return new URLException(EXCEPTION_MESSAGES.get(exceptionType));
+    public static UrlConfigActionException create(String exceptionType) {
+        return new UrlConfigActionException(EXCEPTION_MESSAGES.get(exceptionType));
     }
 
     static {
         Map<String, String> exceptionMessages = new HashMap<String, String>();
-        exceptionMessages.put("INVALID", "La URL que esta intentando acortar es invalida!");
+        exceptionMessages.put("DELETE", "La configuracion de URL que intenta eliminar no existe!");
 
         EXCEPTION_MESSAGES = exceptionMessages;
     }

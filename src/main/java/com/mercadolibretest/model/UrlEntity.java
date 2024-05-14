@@ -1,8 +1,6 @@
 package com.mercadolibretest.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -25,23 +23,23 @@ public class UrlEntity {
 
     @Id
     @JsonIgnore()
-    private BigInteger idSecuence;
-    private UUID urlKeyId;
+    private BigInteger id;
+    private String urlKeyId;
     private String longUrl;
     private String shortUrl;
     private Date createdAt;
     private Date expiredAt;
     private Boolean isAvailable;
 
-    public static UrlEntity getUrlEntityBuilder(BigInteger idSecuence, String url, String shortUrl, Date expiredAt) {
+    public static UrlEntity getUrlEntityBuilder(BigInteger id, String url, String shortUrl, Date expiredAt) {
         return UrlEntity.builder()
-                .urlKeyId(UUID.randomUUID())
+                .urlKeyId(UUID.randomUUID().toString())
                 .longUrl(url)
                 .shortUrl(shortUrl)
                 .createdAt(new Date())
                 .expiredAt(expiredAt)
                 .isAvailable(Boolean.TRUE)
-                .idSecuence(idSecuence)
+                .id(id)
                 .build();
 
     }
