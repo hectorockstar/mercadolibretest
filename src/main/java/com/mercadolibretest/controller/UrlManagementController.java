@@ -1,5 +1,6 @@
 package com.mercadolibretest.controller;
 
+import com.mercadolibretest.model.UrlDataRequest;
 import com.mercadolibretest.model.UrlEntity;
 import com.mercadolibretest.service.UrlManegementService;
 import com.mercadolibretest.utils.Utils;
@@ -27,8 +28,8 @@ public class UrlManagementController {
 
     @PostMapping("/create-short-url")
     @ResponseBody
-    public ResponseEntity<Object> createShortUrl(@RequestParam("url") String url) {
-        return ResponseEntity.ok(Utils.toJSONFromObject(urlManegementService.createShortUrl(url)));
+    public ResponseEntity<Object> createShortUrl(@RequestBody UrlDataRequest urlDataRequest) {
+        return ResponseEntity.ok(Utils.toJSONFromObject(urlManegementService.createShortUrl(urlDataRequest)));
     }
 
     @GetMapping("/get-long-url")

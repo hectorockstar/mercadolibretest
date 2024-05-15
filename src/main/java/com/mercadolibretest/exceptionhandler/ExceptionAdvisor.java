@@ -1,6 +1,7 @@
 package com.mercadolibretest.exceptionhandler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.mercadolibretest.exceptionhandler.custom.DateCustomException;
 import com.mercadolibretest.exceptionhandler.custom.UrlConfigActionException;
 import com.mercadolibretest.exceptionhandler.custom.UrlException;
 import com.mercadolibretest.utils.Utils;
@@ -18,7 +19,7 @@ public class ExceptionAdvisor {
 
     @ExceptionHandler(UrlException.class)
     public ResponseEntity<String> handleUrlException(UrlException urlException){
-        HttpStatus httpStatus = HttpStatus.ACCEPTED;
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
         Map<String, String> errorMap = new HashMap<String, String>();
         errorMap.put("mensaje", urlException.getMessage());
 
@@ -30,6 +31,15 @@ public class ExceptionAdvisor {
         HttpStatus httpStatus = HttpStatus.ACCEPTED;
         Map<String, String> errorMap = new HashMap<String, String>();
         errorMap.put("mensaje", urlConfigActionException.getMessage());
+
+        return new ResponseEntity<>(Utils.toJSONFromObject(errorMap), httpStatus);
+    }
+
+    @ExceptionHandler(DateCustomException.class)
+    public ResponseEntity<String> handleFormatDateParseException(DateCustomException dateCustomException){
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+        Map<String, String> errorMap = new HashMap<String, String>();
+        errorMap.put("mensaje", dateCustomException.getMessage());
 
         return new ResponseEntity<>(Utils.toJSONFromObject(errorMap), httpStatus);
     }
