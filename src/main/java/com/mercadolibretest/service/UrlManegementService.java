@@ -3,8 +3,8 @@ package com.mercadolibretest.service;
 import com.mercadolibretest.constants.MercadoLibreTestConstants;
 import com.mercadolibretest.exceptionhandler.custom.DateCustomException;
 import com.mercadolibretest.exceptionhandler.custom.UrlConfigActionException;
-import com.mercadolibretest.model.UrlDataRequest;
-import com.mercadolibretest.model.UrlDataResponse;
+import com.mercadolibretest.dto.UrlDataRequest;
+import com.mercadolibretest.dto.UrlDataResponse;
 import com.mercadolibretest.model.UrlEntity;
 import com.mercadolibretest.repository.UrlManagementRepository;
 import com.mercadolibretest.utils.Utils;
@@ -20,9 +20,7 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDateTime;
 import java.util.Base64;
-import java.util.Date;
 
 @Service
 public class UrlManegementService {
@@ -52,8 +50,18 @@ public class UrlManegementService {
         return UrlDataResponse.getUrlDataResponseBuilder(urlEntity);
     }
 
-    public UrlDataResponse getLongUrlByShortUrl(String shortUrl) {
+    @SneakyThrows
+    public UrlDataResponse getLongUrlByShortUrl(String url) {
+
+        String shortUrl = url;
+        if (url != null && url.length() > MercadoLibreTestConstants.URL_MAX_SIZE) {
+            shortUrl = this.getEncodedUrl(url);
+        }
+
         UrlEntity urlEntity = urlManagementRepository.findByShortUrl(shortUrl);
+        if(urlEntity == null) {
+            throw UrlConfigActionException.create("URL_NOT_AVAILABLE");
+        }
         return UrlDataResponse.getUrlDataResponseBuilder(urlEntity);
     }
 
@@ -85,10 +93,28 @@ public class UrlManegementService {
         UrlEntity urlEntity = urlManagementRepository.findByShortUrl(shortUrl);
 
         if(urlEntity == null) {
-            throw UrlConfigActionException.create("DELETE");
+            throw UrlConfigActionException.create("URL_NOT_EXIST");
         }
         urlManagementRepository.deleteByShortUrl(urlEntity.getShortUrl());
         return urlEntity;
+    }
+
+    @Transactional
+    @SneakyThrows
+    public UrlDataResponse updateUrlConfigByShortUrl(String shortUrl, UrlDataRequest urlDataRequest) {
+        UrlEntity urlEntity = urlManagementRepository.findByShortUrl(shortUrl);
+
+        String expiredAt = urlDataRequest.getExpiredAt();
+        if(expiredAt != null && !Utils.expiredDateValidator(Utils.stringDateToDateFormatter(expiredAt))){
+            throw DateCustomException.create("DATE_EXPIRED");
+        }
+
+        urlEntity.setIsAvailable(urlDataRequest.getIsAvailable());
+        urlEntity.setExpiredAt(Utils.stringDateToDateFormatter(expiredAt));
+        urlEntity.setUpdatedAt(Utils.getSystemDate());
+
+        urlManagementRepository.save(urlEntity);
+        return UrlDataResponse.getUrlDataResponseBuilder(urlEntity);
     }
 
     private String getEncodedUrl(String url) throws NoSuchAlgorithmException {
@@ -99,7 +125,7 @@ public class UrlManegementService {
         StringBuilder sb = new StringBuilder();
         sb.append(base64Encoded);
 
-        return sb.substring(0, 7).toUpperCase();
+        return sb.substring(0, MercadoLibreTestConstants.URL_MAX_SIZE).toUpperCase();
     }
 
 

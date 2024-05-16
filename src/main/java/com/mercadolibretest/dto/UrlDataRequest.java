@@ -1,4 +1,4 @@
-package com.mercadolibretest.model;
+package com.mercadolibretest.dto;
 
 import lombok.Data;
 

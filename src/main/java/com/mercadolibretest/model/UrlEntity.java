@@ -1,6 +1,7 @@
 package com.mercadolibretest.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.mercadolibretest.dto.UrlDataRequest;
 import com.mercadolibretest.utils.Utils;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.UUID;
@@ -18,7 +20,7 @@ import java.util.UUID;
 @Table(name = "urls")
 @AllArgsConstructor
 @NoArgsConstructor
-public class UrlEntity {
+public class UrlEntity implements Serializable {
 
     @Id
     @JsonIgnore()
@@ -29,9 +31,11 @@ public class UrlEntity {
     private String shortUrl;
     private Date createdAt;
     private Date expiredAt;
+    private Date lastVisitedAt;
     private Boolean isAvailable;
     private BigInteger visitsNumber;
-    private Date lastVisitedAt;
+    private Date updatedAt;
+
 
     public static UrlEntity getUrlEntityBuilder(UrlDataRequest urlDataRequest, String shortUrl) {
         Date expiredAt = Utils.stringDateToDateFormatter(urlDataRequest.getExpiredAt());

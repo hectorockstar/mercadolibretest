@@ -1,11 +1,13 @@
 package com.mercadolibretest.exceptionhandler.custom;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Data
+@EqualsAndHashCode(callSuper=false)
 public class UrlConfigActionException extends Exception {
     private static final Map<String, String> EXCEPTION_MESSAGES;
 
@@ -17,10 +19,10 @@ public class UrlConfigActionException extends Exception {
 
     static {
         Map<String, String> exceptionMessages = new HashMap<String, String>();
-        exceptionMessages.put("DELETE", "La configuracion de URL que intenta eliminar no existe!");
-        exceptionMessages.put("URL_EXPIRED", "La fecha de acceso a la Url ha expirado!");
-        exceptionMessages.put("URL_EXIST", "La url que intentas registrar ya existe!");
-        exceptionMessages.put("URL_NOT_AVAILABLE", "La url que intentas acceder no esta disponible o no existe!");
+        exceptionMessages.put("URL_NOT_EXIST", "La configuracion de URL que intenta eliminar no existe!");
+        exceptionMessages.put("URL_EXPIRED", "Lo sentimos! La fecha de acceso a la Url ha expirado!");
+        exceptionMessages.put("URL_EXIST", "Lo sentimos! La url que intentas registrar ya existe!");
+        exceptionMessages.put("URL_NOT_AVAILABLE", "Lo sentimos! La url que intentas acceder o ver, ya no esta disponible o no existe!");
 
         EXCEPTION_MESSAGES = exceptionMessages;
     }

@@ -1,19 +1,14 @@
 package com.mercadolibretest.controller;
 
-import com.mercadolibretest.model.UrlDataRequest;
+import com.mercadolibretest.dto.UrlDataRequest;
 import com.mercadolibretest.model.UrlEntity;
 import com.mercadolibretest.service.UrlManegementService;
 import com.mercadolibretest.utils.Utils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jdk.jshell.execution.Util;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
-
-import java.math.BigInteger;
 
 @RestController
 @RequestMapping("/url-management")
@@ -32,10 +27,10 @@ public class UrlManagementController {
         return ResponseEntity.ok(Utils.toJSONFromObject(urlManegementService.createShortUrl(urlDataRequest)));
     }
 
-    @GetMapping("/get-long-url")
+    @GetMapping("/get-url")
     @ResponseBody
-    public ResponseEntity<Object> getLongUrlByShortUrl(@RequestParam("shortUrl") String shortUrl) {
-        return ResponseEntity.ok(Utils.toJSONFromObject(urlManegementService.getLongUrlByShortUrl(shortUrl)));
+    public ResponseEntity<Object> getUrlByUrl(@RequestParam("url") String url) {
+        return ResponseEntity.ok(Utils.toJSONFromObject(urlManegementService.getLongUrlByShortUrl(url)));
     }
 
     @GetMapping("/{shortUrl}")
@@ -49,6 +44,12 @@ public class UrlManagementController {
     public ResponseEntity<Object> deleteUrlConfigByShortUrl(@PathVariable String shortUrl) {
         UrlEntity urlEntity = urlManegementService.deleteUrlConfigByShortUrl(shortUrl);
         return ResponseEntity.ok(String.format("Configuracion de URL: '%s' ha sido eliminada exitosamente", urlEntity.getLongUrl()));
+    }
+
+    @PatchMapping("/{shortUrl}")
+    @ResponseBody
+    public ResponseEntity<Object> updateUrlConfigByShortUrl(@PathVariable String shortUrl, @RequestBody UrlDataRequest urlDataRequest) {
+        return ResponseEntity.ok(urlManegementService.updateUrlConfigByShortUrl(shortUrl, urlDataRequest));
     }
 
 }

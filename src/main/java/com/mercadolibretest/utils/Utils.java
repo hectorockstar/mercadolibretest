@@ -55,11 +55,8 @@ public class Utils {
 
     @SneakyThrows
     public static String dateToStringDateFormatter(Date date) {
-
-        String stringDate = null;
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        stringDate = simpleDateFormat.format(date);
-        return stringDate;
+        return simpleDateFormat.format(date);
     }
 
     public static Date getSystemDate() throws ParseException {
