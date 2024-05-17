@@ -1,6 +1,7 @@
 package com.mercadolibretest.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mercadolibretest.constants.MercadoLibreTestConstants;
 import com.mercadolibretest.exceptionhandler.custom.DateCustomException;
 import com.mercadolibretest.exceptionhandler.custom.UrlException;
 import lombok.SneakyThrows;
@@ -30,6 +31,10 @@ public class Utils {
         } catch (MalformedURLException | URISyntaxException e) {
             throw UrlException.create("INVALID");
         }
+    }
+
+    public static Boolean isLongUrl(String url) {
+        return url != null && url.length() > MercadoLibreTestConstants.URL_MAX_SIZE;
     }
 
     @SneakyThrows

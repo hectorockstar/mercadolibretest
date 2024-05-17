@@ -1,18 +1,22 @@
 package com.mercadolibretest.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.mercadolibretest.model.UrlEntity;
 import com.mercadolibretest.utils.Utils;
 import lombok.Data;
 import lombok.experimental.SuperBuilder;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Date;
 
 @Data
 @SuperBuilder
-public class UrlDataResponse {
+public class UrlDataResponse implements Serializable {
 
+    @JsonIgnore()
+    private String id;
     private String urlKeyId;
     private String longUrl;
     private String shortUrl;
@@ -25,11 +29,14 @@ public class UrlDataResponse {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String updatedAt;
 
+    private String urlToShow;
+
     public static UrlDataResponse getUrlDataResponseBuilder(UrlEntity urlEntity) {
         Date lastVisitedAt = urlEntity.getLastVisitedAt();
         Date updatedAt = urlEntity.getUpdatedAt();
 
         return UrlDataResponse.builder()
+                .id(urlEntity.getId().toString())
                 .urlKeyId(urlEntity.getUrlKeyId())
                 .longUrl(urlEntity.getLongUrl())
                 .shortUrl(urlEntity.getShortUrl())

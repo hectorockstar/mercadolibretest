@@ -19,7 +19,7 @@ public class UrlConfigActionException extends Exception {
 
     static {
         Map<String, String> exceptionMessages = new HashMap<String, String>();
-        exceptionMessages.put("URL_NOT_EXIST", "La configuracion de URL que intenta eliminar no existe!");
+        exceptionMessages.put("URL_NOT_EXIST", "La configuracion de URL que intenta actualizar o eliminar no existe!");
         exceptionMessages.put("URL_EXPIRED", "Lo sentimos! La fecha de acceso a la Url ha expirado!");
         exceptionMessages.put("URL_EXIST", "Lo sentimos! La url que intentas registrar ya existe!");
         exceptionMessages.put("URL_NOT_AVAILABLE", "Lo sentimos! La url que intentas acceder o ver, ya no esta disponible o no existe!");

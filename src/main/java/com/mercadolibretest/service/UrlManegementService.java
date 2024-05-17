@@ -11,6 +11,7 @@ import com.mercadolibretest.utils.Utils;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -50,11 +51,12 @@ public class UrlManegementService {
         return UrlDataResponse.getUrlDataResponseBuilder(urlEntity);
     }
 
+    @Cacheable("getLongUrlByShortUrl")
     @SneakyThrows
     public UrlDataResponse getLongUrlByShortUrl(String url) {
 
         String shortUrl = url;
-        if (url != null && url.length() > MercadoLibreTestConstants.URL_MAX_SIZE) {
+        if (Utils.isLongUrl(url)) {
             shortUrl = this.getEncodedUrl(url);
         }
 
@@ -65,25 +67,17 @@ public class UrlManegementService {
         return UrlDataResponse.getUrlDataResponseBuilder(urlEntity);
     }
 
+    @SneakyThrows
+    public String showUrl(String url, UrlDataResponse urlDataResponse) {
+        return Utils.isLongUrl(url) ? urlDataResponse.getShortUrl() : urlDataResponse.getLongUrl();
+    }
+
     @Transactional
     @SneakyThrows
-    public void redirectToLonglUrlbyShortUrl(String shortUrl, HttpServletResponse httpServletResponse) {
-
-        UrlEntity urlEntity = urlManagementRepository.findByShortUrl(shortUrl);
-
-        if(urlEntity == null || !urlEntity.getIsAvailable()) {
-            throw UrlConfigActionException.create("URL_NOT_AVAILABLE");
-        }
-        if(!Utils.expiredDateValidator(urlEntity.getExpiredAt())){
-            throw UrlConfigActionException.create("URL_EXPIRED");
-        }
-
-        urlEntity.setVisitsNumber(urlEntity.getVisitsNumber().add(BigInteger.ONE));
-        urlEntity.setLastVisitedAt(Utils.getSystemDate());
-        urlManagementRepository.save(urlEntity);
-
+    public void redirectToLonglUrlbyShortUrl(UrlDataResponse urlDataResponse, HttpServletResponse httpServletResponse) {
+        urlManagementRepository.updateUrlEntity(new BigInteger(urlDataResponse.getId()));
         httpServletResponse.setStatus(HttpStatus.MOVED_TEMPORARILY.value());
-        httpServletResponse.setHeader(HttpHeaders.LOCATION, urlEntity.getLongUrl());
+        httpServletResponse.setHeader(HttpHeaders.LOCATION, urlDataResponse.getLongUrl());
         httpServletResponse.setHeader(HttpHeaders.CONNECTION, "close");
     }
 
@@ -103,6 +97,9 @@ public class UrlManegementService {
     @SneakyThrows
     public UrlDataResponse updateUrlConfigByShortUrl(String shortUrl, UrlDataRequest urlDataRequest) {
         UrlEntity urlEntity = urlManagementRepository.findByShortUrl(shortUrl);
+        if(urlEntity == null) {
+            throw UrlConfigActionException.create("URL_NOT_EXIST");
+        }
 
         String expiredAt = urlDataRequest.getExpiredAt();
         if(expiredAt != null && !Utils.expiredDateValidator(Utils.stringDateToDateFormatter(expiredAt))){

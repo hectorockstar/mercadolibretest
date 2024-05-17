@@ -1,6 +1,7 @@
 package com.mercadolibretest.controller;
 
 import com.mercadolibretest.dto.UrlDataRequest;
+import com.mercadolibretest.dto.UrlDataResponse;
 import com.mercadolibretest.model.UrlEntity;
 import com.mercadolibretest.service.UrlManegementService;
 import com.mercadolibretest.utils.Utils;
@@ -30,13 +31,21 @@ public class UrlManagementController {
     @GetMapping("/get-url")
     @ResponseBody
     public ResponseEntity<Object> getUrlByUrl(@RequestParam("url") String url) {
+        UrlDataResponse urlDataResponse = urlManegementService.getLongUrlByShortUrl(url);
+        return ResponseEntity.ok(urlManegementService.showUrl(url, urlDataResponse));
+    }
+
+    @GetMapping("/get-url-info")
+    @ResponseBody
+    public ResponseEntity<Object> getInfoUrlByUrl(@RequestParam("url") String url) {
         return ResponseEntity.ok(Utils.toJSONFromObject(urlManegementService.getLongUrlByShortUrl(url)));
     }
 
     @GetMapping("/{shortUrl}")
     @ResponseBody
     public void redirectToLonglUrlbyShortUrl(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, @PathVariable String shortUrl) {
-        urlManegementService.redirectToLonglUrlbyShortUrl(shortUrl, httpServletResponse);
+        UrlDataResponse urlDataResponse = urlManegementService.getLongUrlByShortUrl(shortUrl);
+        urlManegementService.redirectToLonglUrlbyShortUrl(urlDataResponse, httpServletResponse);
     }
 
     @DeleteMapping("/{shortUrl}")
