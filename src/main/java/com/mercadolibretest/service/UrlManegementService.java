@@ -89,7 +89,7 @@ public class UrlManegementService {
         if(urlEntity == null) {
             throw UrlConfigActionException.create("URL_NOT_EXIST");
         }
-        urlManagementRepository.deleteByShortUrl(urlEntity.getShortUrl());
+        urlManagementRepository.deleteById(urlEntity.getId());
         return urlEntity;
     }
 

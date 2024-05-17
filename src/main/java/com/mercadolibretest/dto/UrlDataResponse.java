@@ -29,8 +29,6 @@ public class UrlDataResponse implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String updatedAt;
 
-    private String urlToShow;
-
     public static UrlDataResponse getUrlDataResponseBuilder(UrlEntity urlEntity) {
         Date lastVisitedAt = urlEntity.getLastVisitedAt();
         Date updatedAt = urlEntity.getUpdatedAt();
