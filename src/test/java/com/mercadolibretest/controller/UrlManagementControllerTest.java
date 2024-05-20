@@ -8,6 +8,7 @@ import com.mercadolibretest.MercadolibretestApplication;
 import com.mercadolibretest.dto.UrlDataRequest;
 import com.mercadolibretest.dto.UrlDataResponse;
 import com.mercadolibretest.utils.Utils;
+import org.apache.commons.digester.annotations.rules.SetNext;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +54,10 @@ public class UrlManagementControllerTest {
 
     @Test
     public void createShortUrlShouldBeHttpStatus201() throws Exception {
+        String expectedJson = Utils.getFileContentResource("testConfigs/controller/shortUrlCreatedHttpStatus201Expected.json");
+        UrlDataResponse urlDataResponseExpected = (UrlDataResponse)Utils.toObjectFromJSON(expectedJson, UrlDataResponse.class);
+        this.deleteAuxForTests(urlDataResponseExpected.getShortUrl());
+
         String uri = "/url-management/create-short-url";
         UrlDataRequest urlDataRequest = new UrlDataRequest();
         urlDataRequest.setLongUrl("https://www.mercadolibre.cl/apple-iphone-11-128-gb-blanco-distribuidor-autorizado/p/MLC1015149568?pdp_filters=category:MLC1055#searchVariation=MLC1015149568&position=2&search_layout=stack&type=product&tracking_id=4681ed81-13fa-4db5-bf85-47b8d5d0986f");
@@ -72,20 +77,19 @@ public class UrlManagementControllerTest {
 
         UrlDataResponse urlDataResponseResult = (UrlDataResponse)Utils.toObjectFromJSON(mvcResult.getResponse().getContentAsString(), UrlDataResponse.class);
 
-        String expectedJson = Utils.getFileContentResource("testConfigs/controller/shortUrlCreatedHttpStatus201Expected.json");
-        UrlDataResponse urlDataResponseExpected = (UrlDataResponse)Utils.toObjectFromJSON(expectedJson, UrlDataResponse.class);
-
         assertEquals(urlDataResponseResult.getShortUrl(), urlDataResponseExpected.getShortUrl());
     }
 
     @Test
     public void getShortUrlByLongUrlShouldBeHttpStatus200() throws Exception {
+        String shortUrl = "XXJJ3EA";
+        this.deleteAuxForTests(shortUrl);
         this.createShortUrlShouldBeHttpStatus201();
 
         String uri = "/url-management/get-url";
 
         String longUrl = "https://www.mercadolibre.cl/apple-iphone-11-128-gb-blanco-distribuidor-autorizado/p/MLC1015149568?pdp_filters=category:MLC1055#searchVariation=MLC1015149568&position=2&search_layout=stack&type=product&tracking_id=4681ed81-13fa-4db5-bf85-47b8d5d0986f";
-        String shortUrl = "XXJJ3EA";
+
 
         MvcResult mvcResult = mockMvc.perform(
                 MockMvcRequestBuilders
@@ -97,7 +101,7 @@ public class UrlManagementControllerTest {
         assertEquals(200, status);
 
         String urlResult = mvcResult.getResponse().getContentAsString();
-        String urlExpected = "XXJJ3EA";
+        String urlExpected = shortUrl;
 
         assertEquals(urlResult, urlExpected);
 
@@ -105,11 +109,11 @@ public class UrlManagementControllerTest {
 
     @Test
     public void getLongUrlByShortUrlShouldBeHttpStatus200() throws Exception {
+        String shortUrl = "XXJJ3EA";
+        this.deleteAuxForTests(shortUrl);
         this.createShortUrlShouldBeHttpStatus201();
 
         String uri = "/url-management/get-url";
-
-        String shortUrl = "XXJJ3EA";
 
         MvcResult mvcResult = mockMvc.perform(
                 MockMvcRequestBuilders
@@ -129,11 +133,11 @@ public class UrlManagementControllerTest {
 
     @Test
     public void getUrlInfoByUrlShouldBeHttpStatus200() throws Exception {
+        String shortUrl = "XXJJ3EA";
+        this.deleteAuxForTests(shortUrl);
         this.createShortUrlShouldBeHttpStatus201();
 
         String uri = "/url-management/get-url-info";
-
-        String shortUrl = "XXJJ3EA";
 
         MvcResult mvcResult = mockMvc.perform(
                 MockMvcRequestBuilders
@@ -151,9 +155,10 @@ public class UrlManagementControllerTest {
 
     @Test
     public void redirectToLongUrlByShortUrlShouldBeHttpStatus302() throws Exception {
+        String shortUrl = "XXJJ3EA";
+        this.deleteAuxForTests(shortUrl);
         this.createShortUrlShouldBeHttpStatus201();
 
-        String shortUrl = "XXJJ3EA";
         String uri = "/url-management/" + shortUrl;
 
         MvcResult mvcResult = mockMvc.perform(
@@ -192,9 +197,10 @@ public class UrlManagementControllerTest {
 
     @Test
     public void updateUrlConfigByShortUrlShouldBeHttpStatus302() throws Exception {
+        String shortUrl = "XXJJ3EA";
+        this.deleteAuxForTests(shortUrl);
         this.createShortUrlShouldBeHttpStatus201();
 
-        String shortUrl = "XXJJ3EA";
         String uri = "/url-management/" + shortUrl;
         UrlDataRequest urlDataRequest = new UrlDataRequest();
         urlDataRequest.setExpiredAt("2024-06-29 23:59:00");
@@ -219,7 +225,15 @@ public class UrlManagementControllerTest {
 
     }
 
+    private void deleteAuxForTests(String shortUrl) throws Exception {
+        String uri = "/url-management/" + shortUrl;
 
+        MvcResult mvcResult = mockMvc.perform(
+                MockMvcRequestBuilders
+                        .delete(uri)
+        ).andReturn();
+
+    }
 
 
 }
