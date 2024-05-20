@@ -34,6 +34,8 @@ de 1 segundo).
 - [ ] linea de comando:
   - ./gradlew clean build
   - Para Iniciar: java -jar build/libs/mercadolibretest-0.0.1-SNAPSHOT.jar com.mercadolibretestMercadolibretestApplication.java
+- [ ] Arranque sin redis:
+  - Si quiere ejecutar la aplicacion sin redis, o ejecutar sus test de forma independiente, primero debes configurar como variable de entorno el siguiente campo: "spring.profiles.active" con valor "dev". Esta variable esta ubicada en el archivo "application.properties" del classpath de la aplicacion.
 
 
 ## EndPoints Disponibles

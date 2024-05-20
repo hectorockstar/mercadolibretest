@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mercadolibretest.MercadolibretestApplication;
 import com.mercadolibretest.dto.UrlDataRequest;
 import com.mercadolibretest.dto.UrlDataResponse;
+import com.mercadolibretest.dto.UrlUpdateDataRequest;
 import com.mercadolibretest.utils.Utils;
 import org.apache.commons.digester.annotations.rules.SetNext;
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -34,22 +37,12 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UrlManagementControllerTest {
 
     @Autowired
-    protected MockMvc mockMvc;
+    private MockMvc mockMvc;
     @Autowired
-    WebApplicationContext webApplicationContext;
+    private WebApplicationContext webApplicationContext;
 
     protected void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-    }
-    protected String mapToJson(Object obj) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.writeValueAsString(obj);
-    }
-    protected <T> T mapFromJson(String json, Class<T> clazz)
-            throws JsonParseException, JsonMappingException, IOException {
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.readValue(json, clazz);
     }
 
     @Test
@@ -202,11 +195,11 @@ public class UrlManagementControllerTest {
         this.createShortUrlShouldBeHttpStatus201();
 
         String uri = "/url-management/" + shortUrl;
-        UrlDataRequest urlDataRequest = new UrlDataRequest();
-        urlDataRequest.setExpiredAt("2024-06-29 23:59:00");
-        urlDataRequest.setIsAvailable(Boolean.FALSE);
+        UrlUpdateDataRequest urlUpdateDataRequest = new UrlUpdateDataRequest();
+        urlUpdateDataRequest.setExpiredAt("2024-06-29 23:59:00");
+        urlUpdateDataRequest.setIsAvailable(Boolean.FALSE);
 
-        String inputJson = Utils.toJSONFromObject(urlDataRequest);
+        String inputJson = Utils.toJSONFromObject(urlUpdateDataRequest);
         MvcResult mvcResult = mockMvc.perform(
                 MockMvcRequestBuilders
                         .patch(uri)
@@ -225,14 +218,116 @@ public class UrlManagementControllerTest {
 
     }
 
-    private void deleteAuxForTests(String shortUrl) throws Exception {
-        String uri = "/url-management/" + shortUrl;
+    // EXCEPTIONS TEST
+    @Test
+    public void createShortUrlShouldBeBadRequest() throws Exception {
+        String uri = "/url-management/create-short-url";
+        UrlDataRequest urlDataRequest = new UrlDataRequest();
+        //urlDataRequest.setLongUrl("https://www.mercadolibre.cl/apple-iphone-11-128-gb-blanco-distribuidor-autorizado/p/MLC1015149568?pdp_filters=category:MLC1055#searchVariation=MLC1015149568&position=2&search_layout=stack&type=product&tracking_id=4681ed81-13fa-4db5-bf85-47b8d5d0986f");
+        urlDataRequest.setExpiredAt("2024-06-17 23:59:00");
+        urlDataRequest.setIsAvailable(Boolean.TRUE);
 
+        String inputJson = Utils.toJSONFromObject(urlDataRequest);
         MvcResult mvcResult = mockMvc.perform(
                 MockMvcRequestBuilders
-                        .delete(uri)
+                        .post(uri)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(inputJson)
         ).andReturn();
 
+        int status = mvcResult.getResponse().getStatus();
+        assertEquals(400, status);
+    }
+
+    @Test
+    public void createShortUrlShouldBeUrlExist() throws Exception {
+        this.createShortUrlShouldBeHttpStatus201();
+
+        String uri = "/url-management/create-short-url";
+        UrlDataRequest urlDataRequest = new UrlDataRequest();
+        urlDataRequest.setLongUrl("https://www.mercadolibre.cl/apple-iphone-11-128-gb-blanco-distribuidor-autorizado/p/MLC1015149568?pdp_filters=category:MLC1055#searchVariation=MLC1015149568&position=2&search_layout=stack&type=product&tracking_id=4681ed81-13fa-4db5-bf85-47b8d5d0986f");
+        urlDataRequest.setExpiredAt("2024-06-29 23:59:00");
+        urlDataRequest.setIsAvailable(Boolean.TRUE);
+
+        String inputJson = Utils.toJSONFromObject(urlDataRequest);
+        MvcResult mvcResult = mockMvc.perform(
+                MockMvcRequestBuilders
+                        .post(uri)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(inputJson)
+        ).andReturn();
+
+        int status = mvcResult.getResponse().getStatus();
+        assertEquals(202, status);
+
+        String resultMessage = mvcResult.getResponse().getContentAsString();
+
+        String expectedMessage = "Lo sentimos! La url que intentas registrar ya existe!";
+        Map<String, String> expectedResult = new HashMap();
+        expectedResult.put("mensaje", expectedMessage);
+
+        assertEquals(Utils.toJSONFromObject(expectedResult), resultMessage);
+
+    }
+
+    @Test
+    public void createShortUrlShouldBeInvalidDateExpiredAt() throws Exception {
+        String shortUrl = "XXJJ3EA";
+        this.deleteAuxForTests(shortUrl);
+        String uri = "/url-management/create-short-url";
+        UrlDataRequest urlDataRequest = new UrlDataRequest();
+        urlDataRequest.setLongUrl("https://www.mercadolibre.cl/apple-iphone-11-128-gb-blanco-distribuidor-autorizado/p/MLC1015149568?pdp_filters=category:MLC1055#searchVariation=MLC1015149568&position=2&search_layout=stack&type=product&tracking_id=4681ed81-13fa-4db5-bf85-47b8d5d0986f");
+        urlDataRequest.setExpiredAt("2024-01-29 23:59:00");
+        urlDataRequest.setIsAvailable(Boolean.TRUE);
+
+        String inputJson = Utils.toJSONFromObject(urlDataRequest);
+        MvcResult mvcResult = mockMvc.perform(
+                MockMvcRequestBuilders
+                        .post(uri)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(inputJson)
+        ).andReturn();
+
+        int status = mvcResult.getResponse().getStatus();
+        assertEquals(400, status);
+
+        String resultMessage = mvcResult.getResponse().getContentAsString();
+
+        String expectedMessage = "La fecha y hora de expiracion no puede ser menor a la fecha y hora actual!";
+        Map<String, String> expectedResult = new HashMap<>();
+        expectedResult.put("mensaje", expectedMessage);
+
+        assertEquals(Utils.toJSONFromObject(expectedResult), resultMessage);
+
+    }
+
+    @Test
+    public void getShortUrlByLongUrlShouldBeUrlNotAvailable() throws Exception {
+        String shortUrl = "XXJJZZ";
+        this.deleteAuxForTests(shortUrl);
+        String uri = "/url-management/get-url";
+        MvcResult mvcResult = mockMvc.perform(
+                MockMvcRequestBuilders
+                        .get(uri)
+                        .param("url", shortUrl)
+        ).andReturn();
+
+        int status = mvcResult.getResponse().getStatus();
+        assertEquals(202, status);
+
+        String resultMessage = mvcResult.getResponse().getContentAsString();
+
+        String expectedMessage = "Lo sentimos! La url que intentas acceder o ver, ya no esta disponible o no existe!";
+        Map<String, String> expectedResult = new HashMap<>();
+        expectedResult.put("mensaje", expectedMessage);
+
+        assertEquals(Utils.toJSONFromObject(expectedResult), resultMessage);
+    }
+
+
+    private void deleteAuxForTests(String shortUrl) throws Exception {
+        String uri = "/url-management/" + shortUrl;
+        mockMvc.perform(MockMvcRequestBuilders.delete(uri)).andReturn();
     }
 
 

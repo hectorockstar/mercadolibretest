@@ -29,6 +29,8 @@ dependencies {
 	implementation group: 'commons-validator', name: 'commons-validator', version: '1.8.0'
 	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-redis', version: '3.2.5'
 	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: '3.2.5'
+	implementation group: 'com.github.microwww', name: 'redis-server', version: '0.3.1'
+
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation group: 'com.h2database', name: 'h2', version: '2.2.224'
