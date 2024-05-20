@@ -5,10 +5,14 @@ import com.mercadolibretest.constants.MercadoLibreTestConstants;
 import com.mercadolibretest.exceptionhandler.custom.DateCustomException;
 import com.mercadolibretest.exceptionhandler.custom.UrlException;
 import lombok.SneakyThrows;
+import org.springframework.core.io.ClassPathResource;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -74,6 +78,17 @@ public class Utils {
         return date.toInstant()
                 .atZone(ZoneId.systemDefault())
                 .toLocalDateTime();
+    }
+
+    @SneakyThrows
+    public static String getFileContentResource(String classpath){
+        return new String(Files.readAllBytes(Paths.get(new ClassPathResource(classpath).getFile().toURI())));
+    }
+
+    @SneakyThrows
+    public static Object toObjectFromJSON(String jsonString, Class<?> someClass) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.readValue(jsonString, someClass);
     }
 
 }

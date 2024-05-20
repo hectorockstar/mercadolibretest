@@ -8,8 +8,12 @@ import com.mercadolibretest.utils.Utils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.net.http.HttpResponse;
 
 @RestController
 @RequestMapping("/url-management")
@@ -25,27 +29,32 @@ public class UrlManagementController {
     @PostMapping("/create-short-url")
     @ResponseBody
     public ResponseEntity<Object> createShortUrl(@RequestBody UrlDataRequest urlDataRequest) {
-        return ResponseEntity.ok(Utils.toJSONFromObject(urlManegementService.createShortUrl(urlDataRequest)));
+        UrlDataResponse urlDataResponse = urlManegementService.createShortUrl(urlDataRequest);
+        return new ResponseEntity<>(Utils.toJSONFromObject(urlDataResponse), HttpStatus.CREATED);
     }
 
     @GetMapping("/get-url")
     @ResponseBody
     public ResponseEntity<Object> getUrlByUrl(@RequestParam("url") String url) {
         UrlDataResponse urlDataResponse = urlManegementService.getLongUrlByShortUrl(url);
-        return ResponseEntity.ok(urlManegementService.showUrl(url, urlDataResponse));
+        String urlResult = urlManegementService.showUrl(url, urlDataResponse);
+        return ResponseEntity.ok(urlResult);
     }
 
     @GetMapping("/get-url-info")
     @ResponseBody
-    public ResponseEntity<Object> getInfoUrlByUrl(@RequestParam("url") String url) {
-        return ResponseEntity.ok(Utils.toJSONFromObject(urlManegementService.getLongUrlByShortUrl(url)));
+    public ResponseEntity<Object> getUrlInfoByUrl(@RequestParam("url") String url) {
+        UrlDataResponse urlDataResponse = urlManegementService.getLongUrlByShortUrl(url);
+        return ResponseEntity.ok(Utils.toJSONFromObject(urlDataResponse));
     }
 
     @GetMapping("/{shortUrl}")
     @ResponseBody
-    public void redirectToLonglUrlbyShortUrl(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, @PathVariable String shortUrl) {
+    public ResponseEntity<Object> redirectToLongUrlByShortUrl(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, @PathVariable String shortUrl) {
         UrlDataResponse urlDataResponse = urlManegementService.getLongUrlByShortUrl(shortUrl);
         urlManegementService.redirectToLonglUrlbyShortUrl(urlDataResponse, httpServletResponse);
+
+        return new ResponseEntity<>(Utils.toJSONFromObject(urlDataResponse), HttpStatus.MOVED_TEMPORARILY);
     }
 
     @DeleteMapping("/{shortUrl}")
@@ -58,7 +67,8 @@ public class UrlManagementController {
     @PatchMapping("/{shortUrl}")
     @ResponseBody
     public ResponseEntity<Object> updateUrlConfigByShortUrl(@PathVariable String shortUrl, @RequestBody UrlDataRequest urlDataRequest) {
-        return ResponseEntity.ok(urlManegementService.updateUrlConfigByShortUrl(shortUrl, urlDataRequest));
+        UrlDataResponse urlDataResponse = urlManegementService.updateUrlConfigByShortUrl(shortUrl, urlDataRequest);
+        return ResponseEntity.ok(urlDataResponse);
     }
 
 }

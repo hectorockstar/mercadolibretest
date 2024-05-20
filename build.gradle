@@ -28,9 +28,9 @@ dependencies {
 	implementation group: 'commons-validator', name: 'commons-validator', version: '1.8.0'
 	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-redis', version: '3.2.5'
 
-
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation group: 'com.h2database', name: 'h2', version: '2.2.224'
+	testImplementation group: 'junit', name: 'junit', version: '4.13.2'
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
