@@ -2,6 +2,7 @@ package com.mercadolibretest.controller;
 
 import com.mercadolibretest.dto.UrlDataRequest;
 import com.mercadolibretest.dto.UrlDataResponse;
+import com.mercadolibretest.dto.UrlUpdateDataRequest;
 import com.mercadolibretest.model.UrlEntity;
 import com.mercadolibretest.service.UrlManegementService;
 import com.mercadolibretest.utils.Utils;
@@ -149,9 +150,9 @@ public class UrlManagementController {
                     name =  "urlDataRequest",
                     description  = "Datos de prueba",
                     example = "{    \"expiredAt\": \"2024-05-20 23:59:59\",    \"isAvailable\": \"true\"}"
-            ) @RequestBody UrlDataRequest urlDataRequest
+            ) @Valid @RequestBody UrlUpdateDataRequest urlUpdateDataRequest
     ) {
-        UrlDataResponse urlDataResponse = urlManegementService.updateUrlConfigByShortUrl(shortUrl, urlDataRequest);
+        UrlDataResponse urlDataResponse = urlManegementService.updateUrlConfigByShortUrl(shortUrl, urlUpdateDataRequest);
         return ResponseEntity.ok(urlDataResponse);
     }
 

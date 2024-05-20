@@ -7,6 +7,7 @@ import com.mercadolibretest.exceptionhandler.custom.UrlException;
 import com.mercadolibretest.utils.Utils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -59,5 +60,16 @@ public class ExceptionAdvisor {
         HttpStatus httpStatus = HttpStatus.ACCEPTED;
         return new ResponseEntity<>(exText, httpStatus);
     }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<String> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+        Map<String, String> errorMap = new HashMap<String, String>();
+        errorMap.put("mensaje", ex.getMessage());
+
+        return new ResponseEntity<>(Utils.toJSONFromObject(errorMap), httpStatus);
+    }
+
+
 
 }

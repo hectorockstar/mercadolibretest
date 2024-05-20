@@ -1,6 +1,7 @@
 package com.mercadolibretest.service;
 
 import com.mercadolibretest.constants.MercadoLibreTestConstants;
+import com.mercadolibretest.dto.UrlUpdateDataRequest;
 import com.mercadolibretest.exceptionhandler.custom.DateCustomException;
 import com.mercadolibretest.exceptionhandler.custom.UrlConfigActionException;
 import com.mercadolibretest.dto.UrlDataRequest;
@@ -100,18 +101,18 @@ public class UrlManegementService {
 
     @Transactional
     @SneakyThrows
-    public UrlDataResponse updateUrlConfigByShortUrl(String shortUrl, UrlDataRequest urlDataRequest) {
+    public UrlDataResponse updateUrlConfigByShortUrl(String shortUrl, UrlUpdateDataRequest urlUpdateDataRequest) {
         UrlEntity urlEntity = urlManagementRepository.findByShortUrl(shortUrl);
         if(urlEntity == null) {
             throw UrlConfigActionException.create("URL_NOT_EXIST");
         }
 
-        String expiredAt = urlDataRequest.getExpiredAt();
+        String expiredAt = urlUpdateDataRequest.getExpiredAt();
         if(expiredAt != null && !Utils.expiredDateValidator(Utils.stringDateToDateFormatter(expiredAt))){
             throw DateCustomException.create("DATE_EXPIRED");
         }
 
-        urlEntity.setIsAvailable(urlDataRequest.getIsAvailable());
+        urlEntity.setIsAvailable(urlUpdateDataRequest.getIsAvailable());
         urlEntity.setExpiredAt(Utils.stringDateToDateFormatter(expiredAt));
         urlEntity.setUpdatedAt(Utils.getSystemDate());
 
