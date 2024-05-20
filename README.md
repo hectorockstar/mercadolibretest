@@ -28,7 +28,7 @@ de 1 segundo).
   - Desde windows: https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/install-redis-on-windows/
   - Desde Mac: https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/install-redis-on-mac-os/
   - El servidor de Redis debe correr en el puerto 6379 de tu ambiente local. 
-- [ ] Desde tu IDE favorito:
+- [ ] Desde tu IDE:
   - Configurar bootRun desde la clase "MercadolibretestApplication" metodo "main"
   - Run
 - [ ] linea de comando:
