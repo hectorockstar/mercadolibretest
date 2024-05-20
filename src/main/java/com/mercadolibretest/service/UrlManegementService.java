@@ -76,6 +76,11 @@ public class UrlManegementService {
     @SneakyThrows
     public void redirectToLonglUrlbyShortUrl(UrlDataResponse urlDataResponse, HttpServletResponse httpServletResponse) {
         urlManagementRepository.updateUrlEntity(new BigInteger(urlDataResponse.getId()));
+
+        httpServletResponse.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, "*");
+        httpServletResponse.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "*");
+        httpServletResponse.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS, "*");
+        httpServletResponse.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
         httpServletResponse.setStatus(HttpStatus.MOVED_TEMPORARILY.value());
         httpServletResponse.setHeader(HttpHeaders.LOCATION, urlDataResponse.getLongUrl());
         httpServletResponse.setHeader(HttpHeaders.CONNECTION, "close");
