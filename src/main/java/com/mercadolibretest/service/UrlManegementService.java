@@ -75,7 +75,17 @@ public class UrlManegementService {
 
     @Transactional
     @SneakyThrows
-    public void redirectToLonglUrlbyShortUrl(UrlDataResponse urlDataResponse, HttpServletResponse httpServletResponse) {
+    public void redirectToLongUrlByShortUrl(UrlDataResponse urlDataResponse, HttpServletResponse httpServletResponse) {
+
+        if(!urlDataResponse.getIsAvailable()) {
+            throw UrlConfigActionException.create("URL_NOT_AVAILABLE");
+        }
+
+        String expiredAt = urlDataResponse.getExpiredAt();
+        if(expiredAt != null && !Utils.expiredDateValidator(Utils.stringDateToDateFormatter(expiredAt))){
+            throw UrlConfigActionException.create("URL_EXPIRED");
+        }
+
         urlManagementRepository.updateUrlEntity(new BigInteger(urlDataResponse.getId()));
 
         httpServletResponse.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, "*");

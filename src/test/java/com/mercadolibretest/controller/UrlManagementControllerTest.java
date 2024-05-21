@@ -240,6 +240,34 @@ public class UrlManagementControllerTest {
     }
 
     @Test
+    public void createShortUrlShouldBeUrlException() throws Exception {
+        String uri = "/url-management/create-short-url";
+        UrlDataRequest urlDataRequest = new UrlDataRequest();
+        urlDataRequest.setLongUrl("jskdhdjsghf");
+        urlDataRequest.setExpiredAt("2024-06-17 23:59:00");
+        urlDataRequest.setIsAvailable(Boolean.TRUE);
+
+        String inputJson = Utils.toJSONFromObject(urlDataRequest);
+        MvcResult mvcResult = mockMvc.perform(
+                MockMvcRequestBuilders
+                        .post(uri)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(inputJson)
+        ).andReturn();
+
+        int status = mvcResult.getResponse().getStatus();
+        assertEquals(400, status);
+
+        String resultMessage = mvcResult.getResponse().getContentAsString();
+
+        String expectedMessage = "Lo sentimos! La URL que se esta intentando registrar no es valida!";
+        Map<String, String> expectedResult = new HashMap<>();
+        expectedResult.put("mensaje", expectedMessage);
+
+        assertEquals(Utils.toJSONFromObject(expectedResult), resultMessage);
+    }
+
+    @Test
     public void createShortUrlShouldBeUrlExist() throws Exception {
         this.createShortUrlShouldBeHttpStatus201();
 
@@ -324,10 +352,127 @@ public class UrlManagementControllerTest {
         assertEquals(Utils.toJSONFromObject(expectedResult), resultMessage);
     }
 
+    @Test
+    public void redirectToLongUrlByShortUrlShouldBeUrlNotAvailable() throws Exception {
+        String shortUrl = "TTZPEBW";
+        this.deleteAuxForTests(shortUrl);
+        this.createShortUrlNotAvailableForTest();
+
+        String uri = "/url-management/" + shortUrl;
+
+        MvcResult mvcResult = mockMvc.perform(
+                MockMvcRequestBuilders
+                        .get(uri)
+        ).andReturn();
+
+        int status = mvcResult.getResponse().getStatus();
+        assertEquals(202, status);
+
+        String resultMessage = mvcResult.getResponse().getContentAsString();
+        String expectedMessage = "Lo sentimos! La url que intentas acceder o ver, ya no esta disponible o no existe!";
+        Map<String, String> expectedResult = new HashMap<>();
+        expectedResult.put("mensaje", expectedMessage);
+
+        assertEquals(Utils.toJSONFromObject(expectedResult), resultMessage);
+    }
+
+    @Test
+    public void deleteUrlConfigByShortUrlShouldUrlNotExist() throws Exception {
+        String shortUrl = "XRRBBBS";
+        String uri = "/url-management/" + shortUrl;
+
+        MvcResult mvcResult = mockMvc.perform(
+                MockMvcRequestBuilders
+                        .delete(uri)
+        ).andReturn();
+
+        int status = mvcResult.getResponse().getStatus();
+        assertEquals(202, status);
+
+        String resultMessage = mvcResult.getResponse().getContentAsString();
+        String expectedMessage = "La configuracion de URL que intenta actualizar o eliminar no existe!";
+        Map<String, String> expectedResult = new HashMap<>();
+        expectedResult.put("mensaje", expectedMessage);
+
+        assertEquals(Utils.toJSONFromObject(expectedResult), resultMessage);
+    }
+
+    @Test
+    public void updateUrlConfigByShortUrlShouldBeUrlNotExist() throws Exception {
+        String shortUrl = "HHAGGTT";
+        String uri = "/url-management/" + shortUrl;
+        UrlUpdateDataRequest urlUpdateDataRequest = new UrlUpdateDataRequest();
+        urlUpdateDataRequest.setExpiredAt("2024-06-29 23:59:00");
+        urlUpdateDataRequest.setIsAvailable(Boolean.FALSE);
+
+        String inputJson = Utils.toJSONFromObject(urlUpdateDataRequest);
+        MvcResult mvcResult = mockMvc.perform(
+                MockMvcRequestBuilders
+                        .patch(uri)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(inputJson)
+        ).andReturn();
+
+        int status = mvcResult.getResponse().getStatus();
+        assertEquals(202, status);
+
+        String resultMessage = mvcResult.getResponse().getContentAsString();
+        String expectedMessage = "La configuracion de URL que intenta actualizar o eliminar no existe!";
+        Map<String, String> expectedResult = new HashMap<>();
+        expectedResult.put("mensaje", expectedMessage);
+
+        assertEquals(Utils.toJSONFromObject(expectedResult), resultMessage);
+    }
+
+    @Test
+    public void updateUrlConfigByShortUrlShouldBeNotValidExpiredAtDate() throws Exception {
+        String shortUrl = "XXJJ3EA";
+        this.deleteAuxForTests(shortUrl);
+        this.createShortUrlShouldBeHttpStatus201();
+
+        String uri = "/url-management/" + shortUrl;
+        UrlUpdateDataRequest urlUpdateDataRequest = new UrlUpdateDataRequest();
+        urlUpdateDataRequest.setExpiredAt("2000-06-29 23:59:00");
+        urlUpdateDataRequest.setIsAvailable(Boolean.FALSE);
+
+        String inputJson = Utils.toJSONFromObject(urlUpdateDataRequest);
+        MvcResult mvcResult = mockMvc.perform(
+                MockMvcRequestBuilders
+                        .patch(uri)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(inputJson)
+        ).andReturn();
+
+        int status = mvcResult.getResponse().getStatus();
+        assertEquals(400, status);
+
+        String resultMessage = mvcResult.getResponse().getContentAsString();
+        String expectedMessage = "La fecha y hora de expiracion no puede ser menor a la fecha y hora actual!";
+        Map<String, String> expectedResult = new HashMap<>();
+        expectedResult.put("mensaje", expectedMessage);
+
+        assertEquals(Utils.toJSONFromObject(expectedResult), resultMessage);
+    }
 
     private void deleteAuxForTests(String shortUrl) throws Exception {
         String uri = "/url-management/" + shortUrl;
         mockMvc.perform(MockMvcRequestBuilders.delete(uri)).andReturn();
+    }
+
+    private void createShortUrlNotAvailableForTest() throws Exception {
+        String uri = "/url-management/create-short-url";
+        UrlDataRequest urlDataRequest = new UrlDataRequest();
+        urlDataRequest.setLongUrl("https://www.youtube.com/watch?v=KRqgjpiwrY8");
+        urlDataRequest.setExpiredAt("2028-06-17 23:59:00");
+        urlDataRequest.setIsAvailable(Boolean.FALSE);
+
+        String inputJson = Utils.toJSONFromObject(urlDataRequest);
+        mockMvc.perform(
+                MockMvcRequestBuilders
+                        .post(uri)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(inputJson)
+        ).andReturn();
     }
 
 

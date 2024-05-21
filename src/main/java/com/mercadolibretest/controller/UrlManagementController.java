@@ -107,7 +107,7 @@ public class UrlManagementController {
             ) @PathVariable String shortUrl
     ) {
         UrlDataResponse urlDataResponse = urlManegementService.getLongUrlByShortUrl(shortUrl);
-        urlManegementService.redirectToLonglUrlbyShortUrl(urlDataResponse, httpServletResponse);
+        urlManegementService.redirectToLongUrlByShortUrl(urlDataResponse, httpServletResponse);
 
         return new ResponseEntity<>(Utils.toJSONFromObject(urlDataResponse), HttpStatus.MOVED_TEMPORARILY);
     }
