@@ -45,5 +45,8 @@ Los endpoints que se disponibilizaran una vez que la aplicacion este en ejecucio
 
 ## Base de datos en Memoria
 La base de datos de este proyecto es una H2, por lo tanto funciona en memoria y solo podras la verificar en tiempo de ejecucion de la aplicacion, por lo que a continuacion te dejo el link en el cual se disponibilizara:
-
 - [ ] [H2 Database Admin](http://localhost:1004/h2-console/)
+- [ ] Credenciales:
+  - URL: jdbc:h2:mem:mercadolibretest
+  - user: admin
+  - password: admin
