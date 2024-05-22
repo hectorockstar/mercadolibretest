@@ -11,12 +11,15 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Base64;
 import java.util.Date;
 
 import static java.time.temporal.ChronoUnit.MINUTES;
@@ -26,19 +29,6 @@ public class Utils {
     @SneakyThrows
     public static String toJSONFromObject(Object object) {
         return new ObjectMapper().writeValueAsString(object);
-    }
-
-    @SneakyThrows
-    public static void urlValidator(String url) {
-        try {
-            new URL(url).toURI();
-        } catch (MalformedURLException | URISyntaxException e) {
-            throw UrlException.create("INVALID");
-        }
-    }
-
-    public static Boolean isLongUrl(String url) {
-        return url != null && url.length() > MercadoLibreTestConstants.URL_MAX_SIZE;
     }
 
     @SneakyThrows
@@ -89,6 +79,16 @@ public class Utils {
     public static Object toObjectFromJSON(String jsonString, Class<?> someClass) {
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.readValue(jsonString, someClass);
+    }
+
+    @SneakyThrows
+    public static byte[] getSha256EncodedHash(String valueToEncode) {
+        return MessageDigest.getInstance(MercadoLibreTestConstants.SHA256)
+                .digest(valueToEncode.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static String getBase64Encoded(byte[] valueToEncode) {
+        return Base64.getEncoder().encodeToString(valueToEncode);
     }
 
 }

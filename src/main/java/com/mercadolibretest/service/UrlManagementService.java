@@ -1,6 +1,5 @@
 package com.mercadolibretest.service;
 
-import com.mercadolibretest.constants.MercadoLibreTestConstants;
 import com.mercadolibretest.dto.UrlUpdateDataRequest;
 import com.mercadolibretest.exceptionhandler.custom.DateCustomException;
 import com.mercadolibretest.exceptionhandler.custom.UrlConfigActionException;
@@ -8,6 +7,7 @@ import com.mercadolibretest.dto.UrlDataRequest;
 import com.mercadolibretest.dto.UrlDataResponse;
 import com.mercadolibretest.model.UrlEntity;
 import com.mercadolibretest.repository.UrlManagementRepository;
+import com.mercadolibretest.utils.UrlUtils;
 import com.mercadolibretest.utils.Utils;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
@@ -19,25 +19,23 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 
 @Service
-public class UrlManegementService {
+public class UrlManagementService {
 
+    private final EncondeUrlService encondeUrlService;
     private final UrlManagementRepository urlManagementRepository;
 
     @Autowired
-    public UrlManegementService(UrlManagementRepository urlManagementRepository) {
+    public UrlManagementService(EncondeUrlService encondeUrlService, UrlManagementRepository urlManagementRepository) {
+        this.encondeUrlService = encondeUrlService;
         this.urlManagementRepository = urlManagementRepository;
     }
 
     @SneakyThrows
     public UrlDataResponse createShortUrl(UrlDataRequest urlDataRequest) {
-        Utils.urlValidator(urlDataRequest.getLongUrl());
-        String shortUrl = this.getEncodedUrl(urlDataRequest.getLongUrl());
+        UrlUtils.urlValidator(urlDataRequest.getLongUrl());
+        String shortUrl = encondeUrlService.getEncodedUrl(urlDataRequest.getLongUrl());
 
         UrlEntity urlEntityExist = urlManagementRepository.findByShortUrl(shortUrl);
         if (urlEntityExist != null) {
@@ -54,11 +52,16 @@ public class UrlManegementService {
 
     @Cacheable("getLongUrlByShortUrl")
     @SneakyThrows
+    public UrlDataResponse getLongUrlByShortUrlCacheable(String url) {
+        return this.getLongUrlByShortUrl(url);
+    }
+
+    @SneakyThrows
     public UrlDataResponse getLongUrlByShortUrl(String url) {
 
         String shortUrl = url;
-        if (Utils.isLongUrl(url)) {
-            shortUrl = this.getEncodedUrl(url);
+        if (UrlUtils.isLongUrl(url)) {
+            shortUrl = encondeUrlService.getEncodedUrl(url);
         }
 
         UrlEntity urlEntity = urlManagementRepository.findByShortUrl(shortUrl);
@@ -70,7 +73,7 @@ public class UrlManegementService {
 
     @SneakyThrows
     public String showUrl(String url, UrlDataResponse urlDataResponse) {
-        return Utils.isLongUrl(url) ? urlDataResponse.getShortUrl() : urlDataResponse.getLongUrl();
+        return UrlUtils.isLongUrl(url) ? urlDataResponse.getShortUrl() : urlDataResponse.getLongUrl();
     }
 
     @Transactional
@@ -129,17 +132,4 @@ public class UrlManegementService {
         urlManagementRepository.save(urlEntity);
         return UrlDataResponse.getUrlDataResponseBuilder(urlEntity);
     }
-
-    private String getEncodedUrl(String url) throws NoSuchAlgorithmException {
-        byte[] sha256EncodedHash = MessageDigest.getInstance(MercadoLibreTestConstants.SHA256)
-                                        .digest(url.getBytes(StandardCharsets.UTF_8));
-        String base64Encoded = Base64.getEncoder().encodeToString(sha256EncodedHash);
-
-        StringBuilder sb = new StringBuilder();
-        sb.append(base64Encoded);
-
-        return sb.substring(0, MercadoLibreTestConstants.URL_MAX_SIZE).toUpperCase();
-    }
-
-
 }

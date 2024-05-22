@@ -4,7 +4,7 @@ import com.mercadolibretest.dto.UrlDataRequest;
 import com.mercadolibretest.dto.UrlDataResponse;
 import com.mercadolibretest.dto.UrlUpdateDataRequest;
 import com.mercadolibretest.model.UrlEntity;
-import com.mercadolibretest.service.UrlManegementService;
+import com.mercadolibretest.service.UrlManagementService;
 import com.mercadolibretest.utils.Utils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -24,11 +24,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/url-management")
 public class UrlManagementController {
 
-    private final UrlManegementService urlManegementService;
+    private final UrlManagementService urlManagementService;
 
     @Autowired
-    public UrlManagementController(UrlManegementService urlManegementService) {
-        this.urlManegementService = urlManegementService;
+    public UrlManagementController(UrlManagementService urlManagementService) {
+        this.urlManagementService = urlManagementService;
     }
 
     @Operation(summary = "Endpoint acortador de URL", description = "Este servicio crea una configuracion de URL corta cuando se le entrega una URL normal")
@@ -46,7 +46,7 @@ public class UrlManagementController {
                 example = "{    \"longUrl\": \"https://www.mercadolibre.cl/apple-iphone-11-128-gb-blanco-distribuidor-autorizado/p/MLC1015149568?pdp_filters=category:MLC1055#searchVariation=MLC1015149568&position=2&search_layout=stack&type=product&tracking_id=4681ed81-13fa-4db5-bf85-47b8d5d0986f\",    \"expiredAt\": \"2024-06-17 23:59:00\",    \"isAvailable\": \"true\"}"
             ) @Valid @RequestBody UrlDataRequest urlDataRequest
     ) {
-        UrlDataResponse urlDataResponse = urlManegementService.createShortUrl(urlDataRequest);
+        UrlDataResponse urlDataResponse = urlManagementService.createShortUrl(urlDataRequest);
         return new ResponseEntity<>(Utils.toJSONFromObject(urlDataResponse), HttpStatus.CREATED);
     }
 
@@ -65,8 +65,8 @@ public class UrlManagementController {
                     required = true
             ) @RequestParam("url") String url
     ) {
-        UrlDataResponse urlDataResponse = urlManegementService.getLongUrlByShortUrl(url);
-        String urlResult = urlManegementService.showUrl(url, urlDataResponse);
+        UrlDataResponse urlDataResponse = urlManagementService.getLongUrlByShortUrlCacheable(url);
+        String urlResult = urlManagementService.showUrl(url, urlDataResponse);
         return ResponseEntity.ok(urlResult);
     }
 
@@ -85,7 +85,7 @@ public class UrlManagementController {
                     required = true
             ) @RequestParam("url") String url
     ) {
-        UrlDataResponse urlDataResponse = urlManegementService.getLongUrlByShortUrl(url);
+        UrlDataResponse urlDataResponse = urlManagementService.getLongUrlByShortUrl(url);
         return ResponseEntity.ok(Utils.toJSONFromObject(urlDataResponse));
     }
 
@@ -106,8 +106,8 @@ public class UrlManagementController {
                     required = true
             ) @PathVariable String shortUrl
     ) {
-        UrlDataResponse urlDataResponse = urlManegementService.getLongUrlByShortUrl(shortUrl);
-        urlManegementService.redirectToLongUrlByShortUrl(urlDataResponse, httpServletResponse);
+        UrlDataResponse urlDataResponse = urlManagementService.getLongUrlByShortUrlCacheable(shortUrl);
+        urlManagementService.redirectToLongUrlByShortUrl(urlDataResponse, httpServletResponse);
 
         return new ResponseEntity<>(Utils.toJSONFromObject(urlDataResponse), HttpStatus.MOVED_TEMPORARILY);
     }
@@ -127,7 +127,7 @@ public class UrlManagementController {
                     required = true
             ) @PathVariable String shortUrl
     ) {
-        UrlEntity urlEntity = urlManegementService.deleteUrlConfigByShortUrl(shortUrl);
+        UrlEntity urlEntity = urlManagementService.deleteUrlConfigByShortUrl(shortUrl);
         return ResponseEntity.ok(String.format("Configuracion de URL: '%s' ha sido eliminada exitosamente", urlEntity.getLongUrl()));
     }
 
@@ -152,7 +152,7 @@ public class UrlManagementController {
                     example = "{    \"expiredAt\": \"2024-05-20 23:59:59\",    \"isAvailable\": \"true\"}"
             ) @Valid @RequestBody UrlUpdateDataRequest urlUpdateDataRequest
     ) {
-        UrlDataResponse urlDataResponse = urlManegementService.updateUrlConfigByShortUrl(shortUrl, urlUpdateDataRequest);
+        UrlDataResponse urlDataResponse = urlManagementService.updateUrlConfigByShortUrl(shortUrl, urlUpdateDataRequest);
         return ResponseEntity.ok(urlDataResponse);
     }
 
