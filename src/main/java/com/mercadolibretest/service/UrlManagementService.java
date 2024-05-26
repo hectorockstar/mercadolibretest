@@ -23,19 +23,18 @@ import java.math.BigInteger;
 @Service
 public class UrlManagementService {
 
-    private final EncondeUrlService encondeUrlService;
+    private final EncodeUrlService encodeUrlService;
     private final UrlManagementRepository urlManagementRepository;
 
     @Autowired
-    public UrlManagementService(EncondeUrlService encondeUrlService, UrlManagementRepository urlManagementRepository) {
-        this.encondeUrlService = encondeUrlService;
+    public UrlManagementService(EncodeUrlService encodeUrlService, UrlManagementRepository urlManagementRepository) {
+        this.encodeUrlService = encodeUrlService;
         this.urlManagementRepository = urlManagementRepository;
     }
 
     @SneakyThrows
     public UrlDataResponse createShortUrl(UrlDataRequest urlDataRequest) {
-        UrlUtils.urlValidator(urlDataRequest.getLongUrl());
-        String shortUrl = encondeUrlService.getEncodedUrl(urlDataRequest.getLongUrl());
+        String shortUrl = encodeUrlService.getEncodedUrl(urlDataRequest.getLongUrl());
 
         UrlEntity urlEntityExist = urlManagementRepository.findByShortUrl(shortUrl);
         if (urlEntityExist != null) {
@@ -61,7 +60,7 @@ public class UrlManagementService {
 
         String shortUrl = url;
         if (UrlUtils.isLongUrl(url)) {
-            shortUrl = encondeUrlService.getEncodedUrl(url);
+            shortUrl = encodeUrlService.getEncodedUrl(url);
         }
 
         UrlEntity urlEntity = urlManagementRepository.findByShortUrl(shortUrl);
@@ -85,7 +84,7 @@ public class UrlManagementService {
         }
 
         String expiredAt = urlDataResponse.getExpiredAt();
-        if(expiredAt != null && !Utils.expiredDateValidator(Utils.stringDateToDateFormatter(expiredAt))){
+        if(expiredAt == null || !Utils.expiredDateValidator(Utils.stringDateToDateFormatter(expiredAt))){
             throw UrlConfigActionException.create("URL_EXPIRED");
         }
 
@@ -102,14 +101,14 @@ public class UrlManagementService {
 
     @Transactional
     @SneakyThrows
-    public UrlEntity deleteUrlConfigByShortUrl(String shortUrl) {
+    public UrlDataResponse deleteUrlConfigByShortUrl(String shortUrl) {
         UrlEntity urlEntity = urlManagementRepository.findByShortUrl(shortUrl);
 
         if(urlEntity == null) {
             throw UrlConfigActionException.create("URL_NOT_EXIST");
         }
         urlManagementRepository.deleteById(urlEntity.getId());
-        return urlEntity;
+        return UrlDataResponse.getUrlDataResponseBuilder(urlEntity);
     }
 
     @Transactional
@@ -121,7 +120,7 @@ public class UrlManagementService {
         }
 
         String expiredAt = urlUpdateDataRequest.getExpiredAt();
-        if(expiredAt != null && !Utils.expiredDateValidator(Utils.stringDateToDateFormatter(expiredAt))){
+        if(expiredAt == null || !Utils.expiredDateValidator(Utils.stringDateToDateFormatter(expiredAt))){
             throw DateCustomException.create("DATE_EXPIRED");
         }
 

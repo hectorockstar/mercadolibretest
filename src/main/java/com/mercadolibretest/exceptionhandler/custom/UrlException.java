@@ -19,7 +19,7 @@ public class UrlException extends Exception{
 
     static {
         Map<String, String> exceptionMessages = new HashMap<String, String>();
-        exceptionMessages.put("INVALID", "Lo sentimos! La URL que se esta intentando registrar no es valida!");
+        exceptionMessages.put("INVALID_URL", "Lo sentimos! La URL que se esta intentando registrar no es valida!");
 
         EXCEPTION_MESSAGES = exceptionMessages;
     }

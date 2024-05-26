@@ -38,7 +38,7 @@ public class UrlDataResponse implements Serializable {
         Date updatedAt = urlEntity.getUpdatedAt();
 
         return UrlDataResponse.builder()
-                .id(urlEntity.getId().toString())
+                .id(urlEntity.getId() != null ? urlEntity.getId().toString() : null)
                 .urlKeyId(urlEntity.getUrlKeyId())
                 .longUrl(urlEntity.getLongUrl())
                 .shortUrl(urlEntity.getShortUrl())

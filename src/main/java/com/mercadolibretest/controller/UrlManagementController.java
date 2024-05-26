@@ -5,7 +5,6 @@ import com.mercadolibretest.dto.UrlDataResponse;
 import com.mercadolibretest.dto.UrlUpdateDataRequest;
 import com.mercadolibretest.model.UrlEntity;
 import com.mercadolibretest.service.UrlManagementService;
-import com.mercadolibretest.utils.Utils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -47,7 +46,7 @@ public class UrlManagementController {
             ) @Valid @RequestBody UrlDataRequest urlDataRequest
     ) {
         UrlDataResponse urlDataResponse = urlManagementService.createShortUrl(urlDataRequest);
-        return new ResponseEntity<>(Utils.toJSONFromObject(urlDataResponse), HttpStatus.CREATED);
+        return new ResponseEntity<>(urlDataResponse, HttpStatus.CREATED);
     }
 
     @Operation(summary = "Endpoint de consulta de URL corta con una URL larga y viceversa", description = "Puedes consultar una URL corta brindando una URL larga y al reves. Puedes consultar una URL larga brindando una URL corta")
@@ -86,7 +85,7 @@ public class UrlManagementController {
             ) @RequestParam("url") String url
     ) {
         UrlDataResponse urlDataResponse = urlManagementService.getLongUrlByShortUrl(url);
-        return ResponseEntity.ok(Utils.toJSONFromObject(urlDataResponse));
+        return ResponseEntity.ok(urlDataResponse);
     }
 
     @Operation(summary = "Servicio de redireccionamiento a una URL desde una URL corta", description = "cuando proporcionas una URL corta accederas a la URL original")
@@ -109,7 +108,7 @@ public class UrlManagementController {
         UrlDataResponse urlDataResponse = urlManagementService.getLongUrlByShortUrlCacheable(shortUrl);
         urlManagementService.redirectToLongUrlByShortUrl(urlDataResponse, httpServletResponse);
 
-        return new ResponseEntity<>(Utils.toJSONFromObject(urlDataResponse), HttpStatus.MOVED_TEMPORARILY);
+        return new ResponseEntity<>(urlDataResponse, HttpStatus.MOVED_TEMPORARILY);
     }
 
     @Operation(summary = "Endpoint para eliminar la configuracion de una URL corta", description = "Cuando proporciones una url corta eliminaras por completo su configuracion de reedireccion e informacion asociada a la URL corta que estas proporcionando")
@@ -127,8 +126,8 @@ public class UrlManagementController {
                     required = true
             ) @PathVariable String shortUrl
     ) {
-        UrlEntity urlEntity = urlManagementService.deleteUrlConfigByShortUrl(shortUrl);
-        return ResponseEntity.ok(String.format("Configuracion de URL: '%s' ha sido eliminada exitosamente", urlEntity.getLongUrl()));
+        UrlDataResponse urlDataResponse = urlManagementService.deleteUrlConfigByShortUrl(shortUrl);
+        return ResponseEntity.ok(String.format("Configuracion de URL: '%s' ha sido eliminada exitosamente", urlDataResponse.getLongUrl()));
     }
 
     @Operation(summary = "Endpoint para actualizar la configuracion de una URL", description = "En este endpoint podra actualizar la fecha de expiracion y si la URL estara activa o no para redireccionamiento")

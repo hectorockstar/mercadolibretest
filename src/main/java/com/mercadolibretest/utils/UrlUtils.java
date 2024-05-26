@@ -15,7 +15,7 @@ public class UrlUtils {
         try {
             new URL(url).toURI();
         } catch (MalformedURLException | URISyntaxException e) {
-            throw UrlException.create("INVALID");
+            throw UrlException.create("INVALID_URL");
         }
     }
 
